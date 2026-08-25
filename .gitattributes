@@ -1,0 +1,14 @@
+# Normaliza para LF no repositorio; o Git decide o final de linha no checkout.
+* text=auto
+
+# Arquivos que PRECISAM de LF mesmo em checkout no Windows.
+# Com CRLF, o shebang vira "/usr/bin/env bash\r" e o Linux responde
+# "bad interpreter: no such file or directory".
+*.sh          text eol=lf
+mvnw          text eol=lf
+Dockerfile    text eol=lf
+*.cnf         text eol=lf
+*.sql         text eol=lf
+
+# Script do Windows: mantem CRLF.
+*.cmd         text eol=crlf
