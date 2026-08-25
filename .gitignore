@@ -1,0 +1,28 @@
+# Segredos - NUNCA versionar
+.env
+.envcompose
+*.pem
+*.key
+
+# Logs
+*.log
+logs/
+
+# Build Java
+target/
+*.class
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# SO
+.DS_Store
+Thumbs.db
+
+# Material de trabalho interno do grupo - nao faz parte da entrega
+roteiro.md
+comandos1.txt
+comandos2.txt
+*.pdf
