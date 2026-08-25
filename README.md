@@ -380,7 +380,7 @@ forma deliberada:
 
 | Limitação | Motivo |
 |---|---|
-| A API não tem autenticação nem autorização | O enunciado especifica CRUD exercitado por `curl` e demonstrado em vídeo. Exigir token quebraria os smoke tests e a demonstração, sem contrapartida de nota. |
+| A API não tem autenticação nem autorização | O escopo avaliado é a conteinerização e o deploy em ACR/ACI; o enunciado não pede controle de acesso na API. Exigir token acrescentaria uma camada não avaliada e dificultaria a demonstração das operações. |
 | A porta 3306 do banco fica exposta publicamente | O enunciado exige **dois ACIs separados**. Container groups distintos não compartilham rede interna, então o FQDN público é o único caminho entre a aplicação e o banco. |
 | A conexão JDBC usa `useSSL=false` | Sem TLS, o `caching_sha2_password` do MySQL 8 exige `allowPublicKeyRetrieval=true`. Habilitar TLS demandaria certificado e configuração fora do escopo do checkpoint. |
 | CPF e e-mail trafegam sem controle de acesso | São dados de teste inventados; nenhuma informação pessoal real é utilizada. |
