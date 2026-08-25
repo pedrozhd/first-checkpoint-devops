@@ -372,6 +372,23 @@ az container exec \
 - O `application.properties` não tem valores default: sem as variáveis de
   ambiente a aplicação sequer inicia.
 
+### Limitações conhecidas (contexto acadêmico)
+
+Este é um projeto de avaliação, com ambiente efêmero e dados fictícios. As
+decisões abaixo seriam **inadequadas em produção** e estão registradas de
+forma deliberada:
+
+| Limitação | Motivo |
+|---|---|
+| A API não tem autenticação nem autorização | O enunciado especifica CRUD exercitado por `curl` e demonstrado em vídeo. Exigir token quebraria os smoke tests e a demonstração, sem contrapartida de nota. |
+| A porta 3306 do banco fica exposta publicamente | O enunciado exige **dois ACIs separados**. Container groups distintos não compartilham rede interna, então o FQDN público é o único caminho entre a aplicação e o banco. |
+| A conexão JDBC usa `useSSL=false` | Sem TLS, o `caching_sha2_password` do MySQL 8 exige `allowPublicKeyRetrieval=true`. Habilitar TLS demandaria certificado e configuração fora do escopo do checkpoint. |
+| CPF e e-mail trafegam sem controle de acesso | São dados de teste inventados; nenhuma informação pessoal real é utilizada. |
+
+Em um cenário real, o caminho seria: rede virtual privada entre os
+containers (ou um único container group), TLS obrigatório no MySQL,
+autenticação na API e o banco sem endereço público.
+
 ---
 
 ## Como derrubar o ambiente
