@@ -22,6 +22,17 @@ APP_FQDN=$(az container show -g $RESOURCE_GROUP -n $ACI_APP --query ipAddress.fq
 echo $APP_FQDN
 ```
 
+- [ ] **No Git Bash do Windows**, exportar antes de qualquer `az container exec`:
+
+```bash
+export MSYS_NO_PATHCONV=1
+```
+
+> Sem isso, o Git Bash converte `"/bin/bash"` em `C:/Program Files/Git/bin/bash`
+> antes de enviar o comando à Azure, e o `exec` falha com
+> `stat C:/Program: no such file or directory`. Como alternativa, dobre a
+> primeira barra: `--exec-command "//bin/bash"`.
+
 ### Vocabulário — cuidado ao narrar
 
 | Diga | Não diga |
@@ -154,6 +165,11 @@ SHOW TABLES;
 ```
 
 Saia com `exit` duas vezes.
+
+> **Se você rodar `id` neste container**, ele responde `uid=0(root)` — e isso
+> está correto. O MySQL precisa de root para gerenciar o próprio datadir. A
+> exigência de container sem privilégio administrativo vale para o **container
+> da aplicação** (etapa 5), que roda como `appuser`.
 
 ### 6.2 Workbench — de onde saem as evidências
 
@@ -454,6 +470,7 @@ Volte ao Portal com os recursos à vista e encerre mencionando:
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
+| `stat C:/Program: no such file or directory` | Git Bash converteu o caminho | `export MSYS_NO_PATHCONV=1` ou `--exec-command "//bin/bash"` |
 | `az container exec` não abre | shell inexistente | use `/bin/bash`; no ACI do banco também funciona `/bin/sh` |
 | API responde 500 | banco reiniciando | aguarde ~1 min; a política de restart é `Always` |
 | Conexão recusada no curl | ACI ainda subindo | `az container logs -g $RESOURCE_GROUP -n $ACI_APP` |
