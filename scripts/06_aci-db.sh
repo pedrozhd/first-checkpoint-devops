@@ -18,6 +18,13 @@ source "$(dirname "$0")/00_variables.sh"
 
 exigir_comando az
 
+# O Git Bash do Windows converte argumentos que parecem caminho absoluto
+# ("/var/lib/mysql") para a forma nativa ("C:/Program Files/Git/var/...")
+# antes de repassa-los ao az.cmd, e o ACI rejeita o ':' resultante.
+# A variavel desliga essa traducao. Em Linux e macOS ela e inofensiva.
+export MSYS_NO_PATHCONV=1
+export MSYS2_ARG_CONV_EXCL="*"
+
 titulo "06 - ACI DO BANCO DE DADOS"
 echo "ACI     : ${ACI_DB}"
 echo "Imagem  : ${ACR_LOGIN_SERVER}/${IMAGE_DB}:${IMAGE_TAG}"

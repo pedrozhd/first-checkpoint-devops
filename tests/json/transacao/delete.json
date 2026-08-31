@@ -1,0 +1,8 @@
+{
+  "_metodo": "DELETE",
+  "_url": "http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/transacoes/1",
+  "_descricao": "Remove uma transacao. DELETE nao possui corpo de requisicao.",
+  "_resposta_esperada": "204 No Content (404 se o id nao existir)",
+  "_corpo_requisicao": null,
+  "_observacao": "A transacao e o lado N do relacionamento, entao sua exclusao nao encontra restricao de integridade. E esta exclusao que precisa acontecer antes de apagar o cliente correspondente."
+}

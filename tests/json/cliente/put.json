@@ -1,0 +1,9 @@
+{
+  "_metodo": "PUT",
+  "_url": "http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/clientes/1",
+  "_descricao": "Atualiza um cliente existente. Todos os campos sao obrigatorios.",
+  "_resposta_esperada": "200 OK (404 se o id nao existir, 400 se algum campo for invalido)",
+  "nome": "Joana Prado Martins",
+  "cpf": "32132132100",
+  "email": "joana.martins@dimdim.com"
+}

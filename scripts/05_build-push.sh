@@ -20,6 +20,14 @@ exigir_comando docker
 
 RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 
+# No Git Bash do Windows o `pwd` devolve um caminho no estilo Unix
+# (/c/Users/...), que o docker.exe nao reconhece. `pwd -W` entrega a forma
+# nativa (C:/Users/...). Em Linux e macOS a opcao nao existe e o caminho
+# original e mantido.
+if RAIZ_NATIVA="$(cd "${RAIZ}" && pwd -W 2>/dev/null)"; then
+    RAIZ="${RAIZ_NATIVA}"
+fi
+
 titulo "05 - BUILD E PUSH DAS IMAGENS"
 echo "Registry : ${ACR_LOGIN_SERVER}"
 echo "Imagens  : ${IMAGE_DB}:${IMAGE_TAG}"

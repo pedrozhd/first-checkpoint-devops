@@ -1,0 +1,18 @@
+{
+  "_metodo": "GET",
+  "_url_lista": "http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/transacoes",
+  "_url_por_id": "http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/transacoes/1",
+  "_descricao": "Consulta transacoes. GET nao possui corpo de requisicao; este arquivo documenta a chamada e a resposta.",
+  "_resposta_esperada": "200 OK (404 Not Found se o id nao existir)",
+  "_corpo_requisicao": null,
+  "_exemplo_resposta": [
+    {
+      "idTransacao": 1,
+      "idCliente": 1,
+      "descricao": "Deposito inicial",
+      "valor": 1500.00,
+      "tipo": "CREDITO",
+      "dataTransacao": "2026-08-31T14:54:15"
+    }
+  ]
+}

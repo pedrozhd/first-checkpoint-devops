@@ -1,0 +1,13 @@
+{
+  "_metodo": "DELETE",
+  "_url": "http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/clientes/1",
+  "_descricao": "Remove um cliente. DELETE nao possui corpo de requisicao.",
+  "_resposta_esperada": "204 No Content",
+  "_corpo_requisicao": null,
+  "_observacao": "A chave estrangeira transacao -> cliente e ON DELETE RESTRICT. Se o cliente possuir transacoes, a exclusao retorna 409 Conflict e nao 500. E preciso apagar antes as transacoes do cliente.",
+  "_exemplo_resposta_409": {
+    "status": 409,
+    "erro": "Conflito de integridade",
+    "mensagem": "Nao e possivel excluir o cliente: existem transacoes vinculadas a ele. Exclua primeiro as transacoes do cliente."
+  }
+}

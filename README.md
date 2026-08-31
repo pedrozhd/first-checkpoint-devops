@@ -228,6 +228,20 @@ docker push acrdimdimrm561940.azurecr.io/rm561940-app-dimdim:v1
 az acr repository list --name acrdimdimrm561940 --output table
 ```
 
+> **Alternativa — build do lado da Azure.** O ACR é capaz de compilar a
+> imagem por conta própria, através de uma ACR Task, dispensando Docker na
+> máquina local:
+>
+> ```bash
+> az acr build --registry acrdimdimrm561940 \
+>     --image rm561940-app-dimdim:v1 \
+>     --platform linux/amd64 ./app
+> ```
+>
+> Este projeto **não** usa esse caminho: o enunciado pede o build local, o
+> teste local e a entrega dos comandos `docker build` e `docker push`. Fica
+> registrado como referência.
+
 ### 6. Subir os dois ACIs
 
 ```bash

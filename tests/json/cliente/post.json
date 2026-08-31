@@ -1,0 +1,10 @@
+{
+  "_metodo": "POST",
+  "_url": "http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/clientes",
+  "_descricao": "Cria um cliente. Retorna 201 Created com o cabecalho Location apontando para o recurso criado.",
+  "_resposta_esperada": "201 Created",
+  "_observacao": "O cpf e UNIQUE: repetir um ja cadastrado retorna 409. O campo dataCadastro e preenchido pelo banco (DEFAULT CURRENT_TIMESTAMP) e nao deve ser enviado.",
+  "nome": "Joana Prado",
+  "cpf": "32132132100",
+  "email": "joana.prado@dimdim.com"
+}

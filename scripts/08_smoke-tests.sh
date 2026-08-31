@@ -32,7 +32,10 @@ fi
 API="http://${APP_FQDN}:8080/api"
 echo "Endpoint base: ${API}"
 
-CORPO="$(mktemp)"
+# O arquivo temporario fica ao lado do script, e nao em /tmp: no Git Bash do
+# Windows o curl.exe nao enxerga o /tmp emulado, e o corpo da resposta seria
+# gravado em um caminho que este script nao consegue ler de volta.
+CORPO="$(dirname "$0")/.smoke-resposta.tmp"
 trap 'rm -f "${CORPO}"' EXIT
 
 FALHAS=0
@@ -54,10 +57,16 @@ chamar() {
 
 titulo "TABELA CLIENTE"
 
+# O CPF e UNIQUE na tabela. Um valor fixo faria a segunda execucao do script
+# falhar com 409, entao ele e derivado do timestamp para manter o teste
+# reexecutavel.
+CPF_TESTE="$(date +%s | tail -c 10)00"
+CPF_TESTE="${CPF_TESTE:0:11}"
+
 chamar 201 "POST   /clientes" \
     -X POST "${API}/clientes" \
     -H "Content-Type: application/json" \
-    -d '{"nome":"Cliente Smoke Test","cpf":"10120230340","email":"smoke@dimdim.com"}'
+    -d "{\"nome\":\"Cliente Smoke Test\",\"cpf\":\"${CPF_TESTE}\",\"email\":\"smoke@dimdim.com\"}"
 
 ID_CLIENTE=$(grep -o '"idCliente":[0-9]*' "${CORPO}" | head -1 | cut -d: -f2)
 echo "         id_cliente criado: ${ID_CLIENTE}"
@@ -68,7 +77,7 @@ chamar 200 "GET    /clientes/${ID_CLIENTE}"          "${API}/clientes/${ID_CLIEN
 chamar 200 "PUT    /clientes/${ID_CLIENTE}" \
     -X PUT "${API}/clientes/${ID_CLIENTE}" \
     -H "Content-Type: application/json" \
-    -d '{"nome":"Cliente Smoke Test ALTERADO","cpf":"10120230340","email":"smoke.alterado@dimdim.com"}'
+    -d "{\"nome\":\"Cliente Smoke Test ALTERADO\",\"cpf\":\"${CPF_TESTE}\",\"email\":\"smoke.alterado@dimdim.com\"}"
 
 titulo "TABELA TRANSACAO"
 

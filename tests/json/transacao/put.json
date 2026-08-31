@@ -1,0 +1,10 @@
+{
+  "_metodo": "PUT",
+  "_url": "http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/transacoes/1",
+  "_descricao": "Atualiza uma transacao existente. Todos os campos sao obrigatorios.",
+  "_resposta_esperada": "200 OK (404 se o id da transacao ou do cliente nao existir, 400 se algum campo for invalido)",
+  "idCliente": 1,
+  "descricao": "Transferencia recebida - CORRIGIDA",
+  "valor": 1120.75,
+  "tipo": "CREDITO"
+}
