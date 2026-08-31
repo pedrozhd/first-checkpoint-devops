@@ -34,6 +34,20 @@ echo $APP_FQDN
 >
 > Deve imprimir: `rm561940-app-dimdim.brazilsouth.azurecontainer.io`
 
+**Atalho mais seguro para a gravação.** Os comandos do vídeo usam os nomes
+dos recursos por extenso, então `APP_FQDN` é a única variável realmente
+necessária. Definir o valor direto dispensa `cd`, `source` e a consulta ao
+Azure — funciona de qualquer diretório:
+
+```bash
+APP_FQDN=rm561940-app-dimdim.brazilsouth.azurecontainer.io
+echo $APP_FQDN
+```
+
+> **Confirme que o `echo` imprimiu o endereço antes de seguir.** Com a
+> variável vazia, a URL vira `http://:8080/...` e o curl responde
+> `URL rejected: No host part in the URL`.
+
 - [ ] **No Git Bash do Windows**, exportar antes de qualquer `az container exec`:
 
 ```bash
@@ -325,6 +339,7 @@ Volte ao Portal com os recursos à vista e encerre mencionando:
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
+| `URL rejected: No host part in the URL` | `$APP_FQDN` vazio | redefina a variável e confira com `echo $APP_FQDN` |
 | `scripts/00_variables.sh: No such file or directory` | terminal fora da raiz do projeto | `cd` para a raiz e repita o `source`; confira com `pwd` |
 | `argument --resource-group/-g: expected one argument` | variáveis vazias — o `source` não rodou | mesma causa acima |
 | `stat C:/Program: no such file or directory` | Git Bash converteu o caminho | `export MSYS_NO_PATHCONV=1` ou `--exec-command "//bin/bash"` |
