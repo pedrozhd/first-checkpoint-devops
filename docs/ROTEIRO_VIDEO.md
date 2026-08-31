@@ -9,7 +9,9 @@ FIAP — DevOps Tools & Cloud Computing — 1º Checkpoint
 
 - [ ] Os dois ACIs em `Running` (`az container list -o table`)
 - [ ] Portal Azure aberto no grupo `rg-dimdim-rm561940`
-- [ ] Dois terminais prontos: um para `az`/`curl`, outro para o `az container exec`
+- [ ] Terminal pronto para `az`/`curl`
+- [ ] MySQL Workbench **já conectado** (conecte antes de gravar, para a senha não aparecer)
+- [ ] `docs/EVIDENCIAS_VIDEO.sql` aberto numa aba do Workbench
 - [ ] Fonte do terminal **aumentada** — texto pequeno não se lê em vídeo
 - [ ] Gravação em **1080p** (mínimo exigido: 720p), com áudio claro
 - [ ] Variáveis carregadas no terminal:
@@ -121,7 +123,14 @@ administrativo, como o enunciado exige.
 > cobra é o SELECT **dentro do banco**, não a resposta da API. A penalidade
 > por evidência fraca é de −30 pontos.
 
-Abra um shell no container do banco e **deixe esta janela aberta** até o fim:
+As consultas de todas as etapas estão prontas em
+[`docs/EVIDENCIAS_VIDEO.sql`](EVIDENCIAS_VIDEO.sql) — abra esse arquivo no
+Workbench e execute uma por vez com `Ctrl+Enter`.
+
+### 6.1 Prova de que o banco está dentro do ACI
+
+Antes de ir para o Workbench, mostre uma vez que o banco roda no container
+na Azure:
 
 ```bash
 az container exec --resource-group rg-dimdim-rm561940 \
@@ -129,23 +138,56 @@ az container exec --resource-group rg-dimdim-rm561940 \
                   --exec-command "/bin/bash"
 ```
 
-Já dentro do container:
+Dentro do container:
 
 ```bash
 mysql -uuser_dimdim -p
 ```
 
-*(a senha está no Key Vault; recupere antes de gravar com
-`az keyvault secret show --vault-name kv-dimdim-rm561940 --name mysql-app-password --query value -o tsv`)*
+> Digite a senha quando solicitado — **não** a passe na linha de comando,
+> ou ela fica visível na tela. Recupere-a antes de gravar com:
+> `az keyvault secret show --vault-name kv-dimdim-rm561940 --name mysql-app-password --query value -o tsv`
 
 ```sql
 USE db_dimdim;
+SHOW TABLES;
+```
+
+Saia com `exit` duas vezes.
+
+### 6.2 Workbench — de onde saem as evidências
+
+Conexão já configurada:
+
+| Campo | Valor |
+|---|---|
+| Hostname | `rm561940-db-dimdim.brazilsouth.azurecontainer.io` |
+| Port | `3306` |
+| Username | `user_dimdim` |
+| Schema | `db_dimdim` |
+
+Rode a consulta de identificação do servidor:
+
+```sql
+SELECT @@hostname AS servidor, @@version AS versao_mysql,
+       DATABASE() AS banco_atual, CURRENT_USER() AS usuario;
+```
+
+O `servidor` aparece como `SandboxHost-...` — é o nome que a Azure dá ao
+container. Serve como prova de que o Workbench está conectado ao ACI, e não
+a um MySQL local.
+
+Em seguida, o estado inicial:
+
+```sql
+SHOW TABLES;
 SELECT * FROM cliente;
 SELECT * FROM transacao;
 ```
 
 **Narração:** apresente o modelo — `cliente` 1:N `transacao` — e o estado
-inicial dos dados.
+inicial dos dados. Deixe claro que este é o MySQL rodando no ACI, acessado
+pelo FQDN público.
 
 ---
 
@@ -396,6 +438,7 @@ Volte ao Portal com os recursos à vista e encerre mencionando:
 - [ ] Os dois ACIs em `Running`
 - [ ] File Share com os arquivos do MySQL
 - [ ] `id` provando container não-root
+- [ ] Workbench conectado ao FQDN do ACI (`@@hostname` = SandboxHost-...)
 - [ ] **CREATE, READ, UPDATE e DELETE de `cliente`, cada um com seu SELECT**
 - [ ] **CREATE, READ, UPDATE e DELETE de `transacao`, cada um com seu SELECT**
 - [ ] 409 da integridade referencial demonstrado
