@@ -19,13 +19,20 @@ FIAP — DevOps Tools & Cloud Computing — 1º Checkpoint
 - [ ] [`EVIDENCIAS_VIDEO.sql`](EVIDENCIAS_VIDEO.sql) aberto numa aba do Workbench
 - [ ] Fonte do terminal **aumentada** — texto pequeno não se lê em vídeo
 - [ ] Gravação em **1080p** (mínimo exigido: 720p), com áudio claro
-- [ ] Variáveis carregadas no terminal:
+- [ ] Variáveis carregadas no terminal, **a partir da raiz do projeto**:
 
 ```bash
+cd "/c/Users/StartSe/Workspace 2/fiap/cp1_devops"
 source scripts/00_variables.sh
 APP_FQDN=$(az container show -g $RESOURCE_GROUP -n $ACI_APP --query ipAddress.fqdn -o tsv)
 echo $APP_FQDN
 ```
+
+> O `source` usa caminho relativo. Fora da raiz do projeto ele falha com
+> `No such file or directory`, as variáveis ficam vazias e o `az` responde
+> `argument --resource-group/-g: expected one argument`. Confira com `pwd`.
+>
+> Deve imprimir: `rm561940-app-dimdim.brazilsouth.azurecontainer.io`
 
 - [ ] **No Git Bash do Windows**, exportar antes de qualquer `az container exec`:
 
@@ -318,6 +325,8 @@ Volte ao Portal com os recursos à vista e encerre mencionando:
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
+| `scripts/00_variables.sh: No such file or directory` | terminal fora da raiz do projeto | `cd` para a raiz e repita o `source`; confira com `pwd` |
+| `argument --resource-group/-g: expected one argument` | variáveis vazias — o `source` não rodou | mesma causa acima |
 | `stat C:/Program: no such file or directory` | Git Bash converteu o caminho | `export MSYS_NO_PATHCONV=1` ou `--exec-command "//bin/bash"` |
 | `az container exec` não abre | shell inexistente | use `/bin/bash`; no ACI do banco também funciona `/bin/sh` |
 | API responde 500 | banco reiniciando | aguarde ~1 min; a política de restart é `Always` |
