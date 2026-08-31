@@ -45,7 +45,7 @@ SELECT * FROM transacao;
 
 SELECT * FROM cliente WHERE cpf = '32132132100';
 
--- >>> Anote o id_cliente. As consultas seguintes assumem id = 3.
+-- >>> Anote o id_cliente. As consultas seguintes assumem id = 11.
 
 
 -- --- UPDATE ----------------------------------------------------------
@@ -54,7 +54,7 @@ SELECT * FROM cliente WHERE cpf = '32132132100';
 --     -H "Content-Type: application/json" \
 --     -d '{"nome":"Joana Prado Martins","cpf":"32132132100","email":"joana.martins@dimdim.com"}'
 
-SELECT * FROM cliente WHERE id_cliente = 3;
+SELECT * FROM cliente WHERE id_cliente = 11;
 
 -- O DELETE do cliente vem depois, por causa da chave estrangeira.
 
@@ -69,18 +69,18 @@ SELECT * FROM cliente WHERE id_cliente = 3;
 --     -H "Content-Type: application/json" \
 --     -d '{"idCliente":3,"descricao":"Transferencia recebida","valor":890.25,"tipo":"CREDITO"}'
 
-SELECT * FROM transacao WHERE id_cliente = 3;
+SELECT * FROM transacao WHERE id_cliente = 11;
 
--- >>> Anote o id_transacao. As consultas seguintes assumem id = 3.
+-- >>> Anote o id_transacao. As consultas seguintes assumem id = 5.
 
 
 -- --- UPDATE ----------------------------------------------------------
 -- NO TERMINAL (200 OK):
---   curl -i -X PUT http://$APP_FQDN:8080/api/transacoes/3 \
+--   curl -i -X PUT http://$APP_FQDN:8080/api/transacoes/5 \
 --     -H "Content-Type: application/json" \
---     -d '{"idCliente":3,"descricao":"Transferencia recebida - CORRIGIDA","valor":1120.75,"tipo":"CREDITO"}'
+--     -d '{"idCliente":11,"descricao":"Transferencia recebida - CORRIGIDA","valor":1120.75,"tipo":"CREDITO"}'
 
-SELECT * FROM transacao WHERE id_transacao = 3;
+SELECT * FROM transacao WHERE id_transacao = 5;
 
 
 -- --- DELETE ----------------------------------------------------------
@@ -88,7 +88,7 @@ SELECT * FROM transacao WHERE id_transacao = 3;
 --   curl -i -X DELETE http://$APP_FQDN:8080/api/transacoes/3
 
 -- A consulta volta vazia: e essa a evidencia da exclusao.
-SELECT * FROM transacao WHERE id_transacao = 3;
+SELECT * FROM transacao WHERE id_transacao = 5;
 
 
 -- =====================================================================
@@ -101,13 +101,13 @@ SELECT * FROM transacao WHERE id_transacao = 3;
 --     -d '{"idCliente":3,"descricao":"Compra parcelada","valor":300.00,"tipo":"DEBITO"}'
 
 -- O cliente 3 tem transacao vinculada:
-SELECT * FROM transacao WHERE id_cliente = 3;
+SELECT * FROM transacao WHERE id_cliente = 11;
 
 -- NO TERMINAL - a tentativa que FALHA com 409 Conflict:
 --   curl -i -X DELETE http://$APP_FQDN:8080/api/clientes/3
 
 -- O cliente continua no banco - a FK e ON DELETE RESTRICT:
-SELECT * FROM cliente WHERE id_cliente = 3;
+SELECT * FROM cliente WHERE id_cliente = 11;
 
 
 -- =====================================================================
@@ -118,8 +118,8 @@ SELECT * FROM cliente WHERE id_cliente = 3;
 --   curl -i -X DELETE http://$APP_FQDN:8080/api/transacoes/{id}
 --   curl -i -X DELETE http://$APP_FQDN:8080/api/clientes/3
 
-SELECT * FROM cliente   WHERE id_cliente = 3;
-SELECT * FROM transacao WHERE id_cliente = 3;
+SELECT * FROM cliente   WHERE id_cliente = 11;
+SELECT * FROM transacao WHERE id_cliente = 11;
 
 
 -- =====================================================================
@@ -137,7 +137,13 @@ SELECT * FROM cliente WHERE cpf = '45645645600';
 -- NO TERMINAL - reinicia o container do banco (leva 1 a 2 minutos):
 --   az container restart -g rg-dimdim-rm561940 -n rm561940-aci-db
 --
---   O Workbench perde a conexao: Query > Reconnect to Server.
+--   O Workbench costuma reconectar sozinho. Se acusar perda de conexao,
+--   use Query > Reconnect to Server.
+
+-- Comprova que o servidor realmente reiniciou: o valor volta baixo, na
+-- casa dos segundos. Sem isso, nao ha como distinguir em video um restart
+-- de verdade de uma conexao antiga que continuou aberta.
+SHOW STATUS LIKE 'Uptime';
 
 -- DEPOIS do restart - o registro continua la, porque /var/lib/mysql esta
 -- no Azure File Share e nao no disco efemero do container:

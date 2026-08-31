@@ -288,7 +288,8 @@ Bloco **PERSISTENCIA** do arquivo `.sql`.
 2. No Workbench: `SELECT` mostra o registro
 3. No terminal: `az container restart -g rg-dimdim-rm561940 -n rm561940-aci-db`
 4. Aguarde voltar a `Running` (1 a 2 min — pode cortar na edição)
-5. No Workbench: **Query > Reconnect to Server**
+5. No Workbench: `SHOW STATUS LIKE 'Uptime'` — volta na casa dos segundos,
+   comprovando que o servidor reiniciou de fato
 6. `SELECT` de novo — o registro continua lá
 
 **Narração:** o container foi reiniciado e o dado permanece, porque
@@ -343,6 +344,6 @@ Volte ao Portal com os recursos à vista e encerre mencionando:
 | API responde 500 | banco reiniciando | aguarde ~1 min; a política de restart é `Always` |
 | `Too many connections` no Workbench e 500 na API | conexões acumuladas de sessões anteriores | `az container restart -g rg-dimdim-rm561940 -n rm561940-aci-db`; os dados são preservados |
 | Conexão recusada no curl | ACI ainda subindo | `az container logs -g $RESOURCE_GROUP -n $ACI_APP` |
-| Workbench perde a conexão | restart do ACI | Query > Reconnect to Server |
+| Workbench perde a conexão | restart do ACI | Query > Reconnect to Server (ele costuma reconectar sozinho) |
 | `Public Key Retrieval is not allowed` | falta parâmetro na URL JDBC | já tratado no `07_aci-app.sh` |
 | Tabelas não existem | share com dados antigos; `init.sql` ignorado | pare a gravação e investigue antes de continuar |
