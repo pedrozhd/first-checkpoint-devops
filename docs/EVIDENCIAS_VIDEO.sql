@@ -1,6 +1,10 @@
 -- =====================================================================
--- Projeto DimDim - Consultas de evidencia para a gravacao do video
+-- Projeto DimDim - Evidencias do CRUD para a gravacao do video
 -- Grupo lupeol - RM561940 / RM563558 / RM564495
+--
+-- ESTE ARQUIVO E A FONTE UNICA DAS CONSULTAS.
+-- O docs/ROTEIRO_VIDEO.md cuida da narrativa e do que mostrar no Portal;
+-- todo o SQL e todo o curl da demonstracao estao aqui.
 --
 -- Executar no MySQL Workbench conectado ao ACI do banco:
 --
@@ -9,95 +13,106 @@
 --   Username : user_dimdim
 --   Schema   : db_dimdim
 --
--- Cada bloco corresponde a uma etapa do docs/ROTEIRO_VIDEO.md. A ordem
--- importa: as operacoes sao feitas pela API (curl) e cada uma e seguida
--- pelo SELECT que comprova a alteracao no banco.
+-- COMO USAR NA GRAVACAO
+--   1. Deixe este arquivo aberto numa aba do Workbench e o terminal ao lado.
+--   2. Execute UMA consulta por vez: cursor sobre ela e Ctrl+Enter.
+--      Nao use "Execute All" - a demonstracao precisa ser passo a passo.
+--   3. Onde houver um bloco "NO TERMINAL", rode o curl indicado ANTES de
+--      executar o SELECT que vem logo abaixo.
 --
--- No Workbench, execute UMA consulta por vez com Ctrl+Enter, com o cursor
--- sobre ela. Nao use "Execute All" - a demonstracao precisa ser passo a passo.
+-- A ordem e sempre a mesma: a operacao altera o dado pela API, o SELECT
+-- prova a alteracao no banco. Nao ha GET na demonstracao - a leitura que
+-- vale como evidencia e o SELECT, nao a resposta da API.
 -- =====================================================================
 
 USE db_dimdim;
 
 
 -- =====================================================================
--- ETAPA 6 - Estado inicial
+-- ETAPA 6.2 - ESTADO INICIAL
+-- Comeca aqui a demonstracao das evidencias.
 -- =====================================================================
 
--- Confirma que as duas tabelas existem no banco em nuvem
+-- Confirma que a conexao e com o container na Azure, e nao com um MySQL
+-- local: o servidor aparece como "SandboxHost-...".
+SELECT @@hostname     AS servidor,
+       @@version      AS versao_mysql,
+       DATABASE()     AS banco_atual,
+       CURRENT_USER() AS usuario;
+
+-- As duas tabelas do modelo
 SHOW TABLES;
 
--- Estrutura das tabelas (opcional, mas reforca a evidencia do DDL)
+-- Estrutura das tabelas - reforca que o DDL entregue e o que esta no banco
 DESCRIBE cliente;
 DESCRIBE transacao;
 
--- Dados iniciais, vindos do seed do init.sql
+-- A foto do banco ANTES de qualquer alteracao
 SELECT * FROM cliente;
 SELECT * FROM transacao;
 
 
 -- =====================================================================
--- ETAPA 7 - CRUD da tabela CLIENTE
+-- ETAPA 7 - TABELA CLIENTE
 -- =====================================================================
 
+-- ---------------------------------------------------------------------
 -- 7.1 CREATE
--- Executar ANTES no terminal:
---   curl -i -X POST http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/clientes \
+--
+-- NO TERMINAL:
+--   curl -i -X POST http://$APP_FQDN:8080/api/clientes \
 --     -H "Content-Type: application/json" \
 --     -d '{"nome":"Joana Prado","cpf":"32132132100","email":"joana.prado@dimdim.com"}'
 --
--- Evidencia do INSERT:
+--   Mostre o 201 Created e o cabecalho Location.
+-- ---------------------------------------------------------------------
+
+-- Evidencia do INSERT
 SELECT * FROM cliente WHERE cpf = '32132132100';
 
--- Anote o id_cliente retornado. As consultas seguintes assumem id = 3.
+-- >>> Anote o id_cliente retornado. As consultas seguintes assumem id = 3.
 
 
--- 7.2 READ
--- Executar ANTES no terminal:
---   curl -X GET http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/clientes/3
+-- ---------------------------------------------------------------------
+-- 7.2 UPDATE
 --
--- Evidencia de que a API le o mesmo dado que esta no banco:
-SELECT * FROM cliente WHERE id_cliente = 3;
-SELECT * FROM cliente;
-
-
--- 7.3 UPDATE
--- Executar ANTES no terminal:
---   curl -i -X PUT http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/clientes/3 \
+-- NO TERMINAL:
+--   curl -i -X PUT http://$APP_FQDN:8080/api/clientes/3 \
 --     -H "Content-Type: application/json" \
 --     -d '{"nome":"Joana Prado Martins","cpf":"32132132100","email":"joana.martins@dimdim.com"}'
 --
--- Evidencia do UPDATE - nome e email alterados:
+--   Mostre o 200 OK.
+-- ---------------------------------------------------------------------
+
+-- Evidencia do UPDATE - nome e email alterados no banco
 SELECT id_cliente, nome, email, data_cadastro
   FROM cliente
  WHERE id_cliente = 3;
 
+-- O DELETE do cliente fica para a etapa 10, por causa da chave estrangeira.
+
 
 -- =====================================================================
--- ETAPA 8 - CRUD da tabela TRANSACAO
+-- ETAPA 8 - TABELA TRANSACAO
 -- =====================================================================
 
+-- ---------------------------------------------------------------------
 -- 8.1 CREATE
--- Executar ANTES no terminal:
---   curl -i -X POST http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/transacoes \
+--
+-- NO TERMINAL:
+--   curl -i -X POST http://$APP_FQDN:8080/api/transacoes \
 --     -H "Content-Type: application/json" \
 --     -d '{"idCliente":3,"descricao":"Transferencia recebida","valor":890.25,"tipo":"CREDITO"}'
 --
--- Evidencia do INSERT:
+--   Mostre o 201 Created.
+-- ---------------------------------------------------------------------
+
+-- Evidencia do INSERT
 SELECT * FROM transacao WHERE id_cliente = 3;
 
--- Anote o id_transacao. As consultas seguintes assumem id = 3.
+-- >>> Anote o id_transacao. As consultas seguintes assumem id = 3.
 
-
--- 8.2 READ
--- Executar ANTES no terminal:
---   curl -X GET http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/transacoes/3
---
--- Evidencia:
-SELECT * FROM transacao WHERE id_transacao = 3;
-SELECT * FROM transacao;
-
--- Consulta com JOIN - mostra o relacionamento 1:N funcionando
+-- O relacionamento 1:N funcionando
 SELECT c.id_cliente,
        c.nome,
        t.id_transacao,
@@ -109,39 +124,51 @@ SELECT c.id_cliente,
  ORDER BY c.id_cliente, t.id_transacao;
 
 
--- 8.3 UPDATE
--- Executar ANTES no terminal:
---   curl -i -X PUT http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/transacoes/3 \
+-- ---------------------------------------------------------------------
+-- 8.2 UPDATE
+--
+-- NO TERMINAL:
+--   curl -i -X PUT http://$APP_FQDN:8080/api/transacoes/3 \
 --     -H "Content-Type: application/json" \
 --     -d '{"idCliente":3,"descricao":"Transferencia recebida - CORRIGIDA","valor":1120.75,"tipo":"CREDITO"}'
---
--- Evidencia do UPDATE - descricao e valor alterados:
+-- ---------------------------------------------------------------------
+
+-- Evidencia do UPDATE - descricao e valor alterados
 SELECT id_transacao, id_cliente, descricao, valor, tipo
   FROM transacao
  WHERE id_transacao = 3;
 
 
--- 8.4 DELETE
--- Executar ANTES no terminal:
---   curl -i -X DELETE http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/transacoes/3
+-- ---------------------------------------------------------------------
+-- 8.3 DELETE
 --
--- Evidencia do DELETE - a consulta volta vazia:
+-- NO TERMINAL:
+--   curl -i -X DELETE http://$APP_FQDN:8080/api/transacoes/3
+--
+--   Mostre o 204 No Content.
+-- ---------------------------------------------------------------------
+
+-- Evidencia do DELETE - a consulta volta vazia
 SELECT * FROM transacao WHERE id_transacao = 3;
 
--- Confirmacao pela contagem:
+-- Confirmacao pela contagem
 SELECT COUNT(*) AS transacoes_restantes FROM transacao;
 
 
 -- =====================================================================
--- ETAPA 9 - Integridade referencial (o 409)
+-- ETAPA 9 - INTEGRIDADE REFERENCIAL (o 409)
 -- =====================================================================
 
--- Executar ANTES no terminal, para recriar o vinculo:
---   curl -i -X POST http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/transacoes \
+-- ---------------------------------------------------------------------
+-- Recria o vinculo, para tentar apagar um cliente que tem transacao.
+--
+-- NO TERMINAL:
+--   curl -i -X POST http://$APP_FQDN:8080/api/transacoes \
 --     -H "Content-Type: application/json" \
 --     -d '{"idCliente":3,"descricao":"Compra parcelada","valor":300.00,"tipo":"DEBITO"}'
---
--- Confirma que o cliente 3 tem transacao vinculada:
+-- ---------------------------------------------------------------------
+
+-- Confirma que o cliente 3 tem transacao vinculada
 SELECT c.id_cliente,
        c.nome,
        COUNT(t.id_transacao) AS qtd_transacoes
@@ -150,18 +177,8 @@ SELECT c.id_cliente,
  WHERE c.id_cliente = 3
  GROUP BY c.id_cliente, c.nome;
 
--- Agora, no terminal, tentar apagar o cliente:
---   curl -i -X DELETE http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/clientes/3
---   -> a API responde 409 Conflict
---
--- Evidencia de que o cliente NAO foi apagado:
-SELECT * FROM cliente WHERE id_cliente = 3;
-
--- Opcional - a mesma restricao demonstrada direto no banco.
--- Este DELETE FALHA com ERROR 1451, e a falha e a evidencia:
--- DELETE FROM cliente WHERE id_cliente = 3;
-
--- A definicao da chave estrangeira, mostrando o ON DELETE RESTRICT:
+-- A definicao da chave estrangeira, direto do catalogo do MySQL:
+-- delete_rule = RESTRICT e a razao tecnica do 409 que vem a seguir.
 SELECT constraint_name,
        table_name,
        referenced_table_name,
@@ -169,66 +186,86 @@ SELECT constraint_name,
   FROM information_schema.referential_constraints
  WHERE constraint_schema = 'db_dimdim';
 
-
--- =====================================================================
--- ETAPA 10 - DELETE do cliente, na ordem correta
--- =====================================================================
-
--- Executar ANTES no terminal, nesta ordem:
---   curl -i -X DELETE http://.../api/transacoes/{id_da_transacao}
---   curl -i -X DELETE http://.../api/clientes/3
+-- ---------------------------------------------------------------------
+-- NO TERMINAL - a tentativa que deve FALHAR:
+--   curl -i -X DELETE http://$APP_FQDN:8080/api/clientes/3
 --
--- Evidencia de que ambos sairam do banco:
-SELECT * FROM cliente   WHERE id_cliente   = 3;
-SELECT * FROM transacao WHERE id_cliente   = 3;
+--   A API responde 409 Conflict com mensagem legivel, nao 500.
+-- ---------------------------------------------------------------------
 
--- Estado geral apos as exclusoes:
+-- Evidencia de que o cliente NAO foi apagado
+SELECT * FROM cliente WHERE id_cliente = 3;
+
+-- Opcional - a mesma restricao demonstrada direto no banco.
+-- Este DELETE falha com ERROR 1451, e a falha e a evidencia:
+-- DELETE FROM cliente WHERE id_cliente = 3;
+
+
+-- =====================================================================
+-- ETAPA 10 - DELETE DO CLIENTE, NA ORDEM CORRETA
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- NO TERMINAL, nesta ordem - primeiro a transacao, depois o cliente:
+--   curl -i -X DELETE http://$APP_FQDN:8080/api/transacoes/{id_da_transacao}
+--   curl -i -X DELETE http://$APP_FQDN:8080/api/clientes/3
+--
+--   Ambos devem retornar 204 No Content.
+-- ---------------------------------------------------------------------
+
+-- Evidencia de que ambos sairam do banco
+SELECT * FROM cliente   WHERE id_cliente = 3;
+SELECT * FROM transacao WHERE id_cliente = 3;
+
+-- Estado geral apos as exclusoes
 SELECT * FROM cliente;
 SELECT * FROM transacao;
 
 
 -- =====================================================================
--- ETAPA 11 - Teste de persistencia
+-- ETAPA 11 - TESTE DE PERSISTENCIA
 -- =====================================================================
 
--- Executar ANTES no terminal:
---   curl -i -X POST http://rm561940-app-dimdim.brazilsouth.azurecontainer.io:8080/api/clientes \
+-- ---------------------------------------------------------------------
+-- NO TERMINAL:
+--   curl -i -X POST http://$APP_FQDN:8080/api/clientes \
 --     -H "Content-Type: application/json" \
 --     -d '{"nome":"Teste Persistencia","cpf":"45645645600","email":"persistencia@dimdim.com"}'
---
--- ANTES do restart:
+-- ---------------------------------------------------------------------
+
+-- ANTES do restart
 SELECT id_cliente, nome, cpf, data_cadastro
   FROM cliente
  WHERE cpf = '45645645600';
 
--- Agora reiniciar o container do banco, no terminal:
---   az container restart --resource-group rg-dimdim-rm561940 --name rm561940-aci-db
+-- ---------------------------------------------------------------------
+-- NO TERMINAL - reinicia o container do banco:
+--   az container restart --resource-group rg-dimdim-rm561940 \
+--                        --name rm561940-aci-db
 --
--- O Workbench perde a conexao. Aguarde o ACI voltar a Running e
--- reconecte (Query > Reconnect to Server).
---
--- DEPOIS do restart - o registro continua la, porque /var/lib/mysql
--- esta no Azure File Share e nao no disco efemero do container:
+--   Leva 1 a 2 minutos. Aguarde voltar a Running.
+--   O Workbench perde a conexao: reconecte em Query > Reconnect to Server.
+-- ---------------------------------------------------------------------
+
+-- DEPOIS do restart - o registro continua la, porque /var/lib/mysql esta
+-- no Azure File Share e nao no disco efemero do container.
 SELECT id_cliente, nome, cpf, data_cadastro
   FROM cliente
  WHERE cpf = '45645645600';
 
--- Visao final das duas tabelas:
+-- Visao final das duas tabelas
 SELECT * FROM cliente;
 SELECT * FROM transacao;
 
 
 -- =====================================================================
--- Consultas de apoio (se precisar durante a gravacao)
+-- CONSULTAS DE APOIO (se precisar durante a gravacao)
 -- =====================================================================
 
--- Confirma em qual servidor o Workbench esta conectado.
--- Util para deixar claro que e o banco em nuvem, e nao um local:
-SELECT @@hostname       AS servidor,
-       @@version        AS versao_mysql,
-       DATABASE()       AS banco_atual,
-       CURRENT_USER()   AS usuario;
-
--- Contagem geral:
+-- Contagem geral
 SELECT (SELECT COUNT(*) FROM cliente)   AS total_clientes,
        (SELECT COUNT(*) FROM transacao) AS total_transacoes;
+
+-- Ultimos registros inseridos, se perder a referencia de algum id
+SELECT * FROM cliente   ORDER BY id_cliente   DESC LIMIT 5;
+SELECT * FROM transacao ORDER BY id_transacao DESC LIMIT 5;
