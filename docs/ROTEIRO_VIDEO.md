@@ -204,11 +204,10 @@ Saia com `exit` duas vezes.
 
 ## 7. Estado inicial — a foto antes de tudo
 
-No Workbench, execute o bloco **ETAPA 6.2** do arquivo `.sql`:
+No Workbench, execute o bloco **ESTADO INICIAL** do arquivo `.sql`:
 
 - identificação do servidor (`@@hostname` → `SandboxHost-...`)
 - `SHOW TABLES`
-- `DESCRIBE` das duas tabelas
 - `SELECT *` em `cliente` e `transacao`
 
 **Narração:** o `servidor` aparece como `SandboxHost-...`, o nome que a Azure
@@ -220,7 +219,7 @@ inicial dos dados.
 
 ## 8. CRUD da tabela CLIENTE
 
-Bloco **ETAPA 7** do arquivo `.sql`.
+Bloco **CLIENTE** do arquivo `.sql`.
 
 | Passo | Terminal | Workbench |
 |---|---|---|
@@ -241,39 +240,36 @@ vale explicar isso já aqui.
 
 ## 9. CRUD da tabela TRANSACAO
 
-Bloco **ETAPA 8** do arquivo `.sql`.
+Bloco **TRANSACAO** do arquivo `.sql`.
 
 | Passo | Terminal | Workbench |
 |---|---|---|
-| CREATE | `curl POST /api/transacoes` → **201** | `SELECT ... WHERE id_cliente = 3` + JOIN 1:N |
+| CREATE | `curl POST /api/transacoes` → **201** | `SELECT ... WHERE id_cliente = 3` |
 | UPDATE | `curl PUT /api/transacoes/3` → **200** | `SELECT id_transacao, descricao, valor ...` |
 | DELETE | `curl DELETE /api/transacoes/3` → **204** | `SELECT ... WHERE id_transacao = 3` (vazio) |
 
-**Narração:** o JOIN mostra o relacionamento 1:N funcionando. No DELETE, a
-consulta voltar vazia é a evidência — reforce com a contagem.
+**Narração:** no DELETE, a consulta voltar vazia é a evidência da exclusão.
 
 ---
 
 ## 10. Integridade referencial — o 409
 
-Bloco **ETAPA 9** do arquivo `.sql`.
+Bloco **INTEGRIDADE REFERENCIAL** do arquivo `.sql`.
 
 1. `curl POST /api/transacoes` — recria o vínculo com o cliente 3
-2. No Workbench: contagem de transações do cliente e a consulta ao
-   `information_schema`, que mostra `delete_rule = RESTRICT`
+2. No Workbench: `SELECT` mostrando a transação vinculada
 3. `curl DELETE /api/clientes/3` → **409 Conflict**
 4. No Workbench: `SELECT * FROM cliente WHERE id_cliente = 3` — continua lá
 
 **Narração:** a FK é `ON DELETE RESTRICT`. O banco recusa a exclusão, e a
 aplicação traduz isso em **409 com mensagem legível** — não em 500 com stack
-trace. Não é falha: é integridade referencial funcionando, e a consulta ao
-catálogo prova a regra.
+trace. Não é falha: é integridade referencial funcionando.
 
 ---
 
 ## 11. DELETE do cliente, na ordem correta
 
-Bloco **ETAPA 10** do arquivo `.sql`.
+Bloco **DELETE DO CLIENTE, NA ORDEM CORRETA** do arquivo `.sql`.
 
 1. `curl DELETE /api/transacoes/{id}` → **204**
 2. `curl DELETE /api/clientes/3` → **204**
@@ -286,7 +282,7 @@ restrição. Fecha o CRUD completo das duas tabelas.
 
 ## 12. Teste de persistência
 
-Bloco **ETAPA 11** do arquivo `.sql`.
+Bloco **PERSISTENCIA** do arquivo `.sql`.
 
 1. `curl POST /api/clientes` — cria o registro de prova
 2. No Workbench: `SELECT` mostra o registro
@@ -345,6 +341,7 @@ Volte ao Portal com os recursos à vista e encerre mencionando:
 | `stat C:/Program: no such file or directory` | Git Bash converteu o caminho | `export MSYS_NO_PATHCONV=1` ou `--exec-command "//bin/bash"` |
 | `az container exec` não abre | shell inexistente | use `/bin/bash`; no ACI do banco também funciona `/bin/sh` |
 | API responde 500 | banco reiniciando | aguarde ~1 min; a política de restart é `Always` |
+| `Too many connections` no Workbench e 500 na API | conexões acumuladas de sessões anteriores | `az container restart -g rg-dimdim-rm561940 -n rm561940-aci-db`; os dados são preservados |
 | Conexão recusada no curl | ACI ainda subindo | `az container logs -g $RESOURCE_GROUP -n $ACI_APP` |
 | Workbench perde a conexão | restart do ACI | Query > Reconnect to Server |
 | `Public Key Retrieval is not allowed` | falta parâmetro na URL JDBC | já tratado no `07_aci-app.sh` |
